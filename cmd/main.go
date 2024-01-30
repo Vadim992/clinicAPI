@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Vadim992/clinicAPI/internal/database/postgres"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
