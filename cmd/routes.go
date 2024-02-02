@@ -9,6 +9,5 @@ func (c *clinicAPI) routes() http.Handler {
 	router.HandleFunc("/client/", c.handleClient)
 	router.HandleFunc("/doctor/", c.handleDoctor)
 
-	// TODO:add chain middlewares
-	return router
+	return c.recoverPanic(c.logRequest(setHeaders(router)))
 }

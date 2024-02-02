@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Client struct {
@@ -11,6 +12,8 @@ type Client struct {
 	Email     string `json:"email"`
 	Address   string `json:"address"`
 }
+
+var CanChangeFieldClient int = 4
 
 func (db *DB) GetAllClients() ([]*Client, error) {
 	stmt := `SELECT * FROM clients`
@@ -42,7 +45,7 @@ func (db *DB) GetAllClients() ([]*Client, error) {
 
 func (db *DB) GetClient(id int) (*Client, error) {
 
-	stmt := fmt.Sprintf(`SELECT * FROM clients WHERE id=$1`)
+	stmt := `SELECT * FROM clients WHERE id=$1`
 
 	rows := db.DB.QueryRow(stmt, id)
 
@@ -56,18 +59,49 @@ func (db *DB) GetClient(id int) (*Client, error) {
 	return c, nil
 }
 
-func (db *DB) InsertData(firstName, lastName, email, address string) error {
-	stmt := fmt.Sprintf("INSERT INTO clients (firstname, lastname, email, address) VALUES ($1, $2, $3, $4)")
+func (db *DB) InsertClient(c *Client) error {
+	stmt := `INSERT INTO clients (firstname, lastname, email, address) VALUES ($1, $2, $3, $4)`
 
-	if _, err := db.DB.Exec(stmt, firstName, lastName, email, address); err != nil {
+	if _, err := db.DB.Exec(stmt, c.FirstName, c.LastName, c.Email, c.Address); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (db *DB) DeleteData(id int) error {
-	stmt := fmt.Sprintf("DELETE FROM clients WHERE id=$1")
+func (db *DB) UpdateClientAll(id int, c *Client) error {
+
+	if _, err := db.GetClient(id); err != nil {
+		return err
+	}
+
+	stmt := "UPDATE clients SET  firstname = $1," +
+		"lastname = $2, email= $3, address = $4 WHERE id=$5"
+
+	if _, err := db.DB.Exec(stmt, c.FirstName, c.LastName, c.Email, c.Address, id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) UpdateClient(id int, m map[string]string) error {
+
+	if _, err := db.GetClient(id); err != nil {
+		return err
+	}
+
+	var b strings.Builder
+
+	for key, val := range m {
+		b.WriteString(fmt.Sprintf("%s='%s',", key, val))
+	}
+
+	str := b.String()
+
+	str = str[:len(str)-1]
+
+	stmt := fmt.Sprintf("UPDATE clients SET %s WHERE id=$1", str)
 
 	if _, err := db.DB.Exec(stmt, id); err != nil {
 		return err
@@ -76,8 +110,13 @@ func (db *DB) DeleteData(id int) error {
 	return nil
 }
 
-func (db *DB) Update(id int) error {
-	stmt := fmt.Sprintf("UPDATE clients SET id=5 WHERE id=$1")
+func (db *DB) DeleteClient(id int) error {
+
+	if _, err := db.GetClient(id); err != nil {
+		return err
+	}
+
+	stmt := fmt.Sprintf(`DELETE FROM clients WHERE id=$1`)
 
 	if _, err := db.DB.Exec(stmt, id); err != nil {
 		return err
