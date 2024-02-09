@@ -1,11 +1,9 @@
-package main
+package clinicapi
 
 import (
 	"fmt"
 	"net/http"
 )
-
-// TODO: add recovery panic middleware, secure headers middleware ???
 
 func setHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -15,16 +13,15 @@ func setHeaders(next http.Handler) http.Handler {
 	})
 }
 
-func (c *clinicAPI) logRequest(next http.Handler) http.Handler {
+func (c *ClinicAPI) logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c.infoLog.Printf("%s %s %s %s\n", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
+		c.InfoLog.Printf("%s %s %s %s\n", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 		next.ServeHTTP(w, r)
 	})
 
 }
 
-func (c *clinicAPI) recoverPanic(next http.Handler) http.Handler {
-
+func (c *ClinicAPI) recoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {

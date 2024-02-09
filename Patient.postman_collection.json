@@ -1,13 +1,13 @@
 {
 	"info": {
 		"_postman_id": "ccb2e168-e033-4d6b-8aaa-4172352062b4",
-		"name": "Client",
+		"name": "Patient",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32193943"
 	},
 	"item": [
 		{
-			"name": "client/",
+			"name": "patients",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -24,22 +24,21 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/client/",
+					"raw": "http://localhost:3000/patients",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"client",
-						""
+						"patients"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "client/id",
+			"name": "patients/id",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -56,101 +55,14 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/client/10",
+					"raw": "http://localhost:3000/patients/3",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"client",
-						"10"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "client/",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"firstname\": \"Slava\",\n    \"lastname\": \"Push\",\n    \"email\": \"someemail\",\n    \"address\": \"addr\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/client/",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"client",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "client/id",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"id\":10,\n    \"firstname\": \"Slava\",\n    \"lastname\": \"Push\",\n    \"email\": \"someemail\",\n    \"address\": \"addr\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/client/10",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"client",
-						"10"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "client/id",
-			"request": {
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"email\",\n    \"address\": \"address\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/client/3",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"client",
+						"patients",
 						"3"
 					]
 				}
@@ -158,19 +70,105 @@
 			"response": []
 		},
 		{
-			"name": "client/id",
+			"name": "patients",
 			"request": {
-				"method": "DELETE",
+				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstname\": \"Andrey\",\n    \"lastname\": \"Push\",\n    \"email\": {\n        \"String\":\"him@mail.ru\",\n        \"Valid\": true\n    },\n    \"address\": \"addr\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://localhost:3000/client/3",
+					"raw": "http://localhost:3000/patients",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"client",
+						"patients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patients/id",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\":3,\n    \"firstname\": \"Dima\",\n    \"lastname\": \"Push\",\n    \"email\":{\n        \"String\":\"new@mail.ru\",\n        \"Valid\": true\n    },\n    \"address\": \"addr1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/patients/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"patients",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patients/id",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": null,\n    \"address\": \"address\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/patients/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"patients",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patients/id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/patients/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"patients",
 						"3"
 					]
 				}
