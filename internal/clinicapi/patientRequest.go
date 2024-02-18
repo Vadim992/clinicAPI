@@ -6,11 +6,41 @@ import (
 	"errors"
 	"github.com/Vadim992/clinicAPI/pkg/database/postgres"
 	"net/http"
+	"strings"
 )
 
 func (c *ClinicAPI) getPatients(w http.ResponseWriter, r *http.Request) {
+	var pageData PageData
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 
-	patients, err := c.DB.GetPatients()
+	if err := decoder.Decode(&pageData); err != nil {
+		c.serveErr(w, err)
+		return
+	}
+
+	if !validateNumPage(pageData.Page) {
+		c.clientErr(w, http.StatusBadRequest)
+		return
+	}
+
+	if pageData.PatientsFilter.PhoneFilter && pageData.PatientsFilter.FirstNameFilter {
+		c.clientErr(w, http.StatusBadRequest)
+		return
+	}
+
+	offset := (pageData.Page - 1) * pageSize
+
+	var filter string
+
+	switch true {
+	case pageData.PatientsFilter.PhoneFilter:
+		filter = "phone_number"
+	case pageData.PatientsFilter.FirstNameFilter:
+		filter = "firstname"
+	}
+
+	patients, err := c.DB.GetPatients(offset, pageSize, filter)
 
 	if err != nil {
 		c.serveErr(w, err)
@@ -58,12 +88,18 @@ func (c *ClinicAPI) postPatient(w http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&patient); err != nil {
 		c.serveErr(w, err)
 	}
+	patient.Email.String = strings.ToLower(patient.Email.String)
 
 	//TODO: make one func ???
 
 	// Validate patient
 
 	if !checkEmail(patient.Email) {
+		c.clientErr(w, http.StatusBadRequest)
+		return
+	}
+
+	if !checkPhoneNum(patient.PhoneNumber) {
 		c.clientErr(w, http.StatusBadRequest)
 		return
 	}
@@ -82,6 +118,16 @@ func (c *ClinicAPI) postPatient(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+	}
+
+	if patient.PhoneNumber != "" {
+
+		err := c.DB.CheckPhoneNumberPatient(patient.PhoneNumber)
+
+		if !errors.Is(err, sql.ErrNoRows) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 	}
 	// make one func ???
 
@@ -104,12 +150,18 @@ func (c *ClinicAPI) putPatient(w http.ResponseWriter, r *http.Request, id int) {
 		c.serveErr(w, err)
 		return
 	}
+	patient.Email.String = strings.ToLower(patient.Email.String)
 
 	//TODO: make one func ???
 
 	// Validate patient
 
 	if !checkEmail(patient.Email) {
+		c.clientErr(w, http.StatusBadRequest)
+		return
+	}
+
+	if !checkPhoneNum(patient.PhoneNumber) {
 		c.clientErr(w, http.StatusBadRequest)
 		return
 	}
@@ -128,6 +180,16 @@ func (c *ClinicAPI) putPatient(w http.ResponseWriter, r *http.Request, id int) {
 			return
 		}
 
+	}
+
+	if patient.PhoneNumber != "" {
+
+		err := c.DB.CheckPhoneNumberPatient(patient.PhoneNumber)
+
+		if !errors.Is(err, sql.ErrNoRows) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 	}
 	// make one func ???
 
@@ -156,10 +218,17 @@ func (c *ClinicAPI) patchPatient(w http.ResponseWriter, r *http.Request, id int)
 		return
 	}
 
+	patient.Email.String = strings.ToLower(patient.Email.String)
+
 	// TODO: make one func ???
 
 	// Validate patient
 	if !checkEmail(patient.Email) {
+		c.clientErr(w, http.StatusBadRequest)
+		return
+	}
+
+	if patient.PhoneNumber != "" && !checkPhoneNum(patient.PhoneNumber) {
 		c.clientErr(w, http.StatusBadRequest)
 		return
 	}
@@ -180,6 +249,16 @@ func (c *ClinicAPI) patchPatient(w http.ResponseWriter, r *http.Request, id int)
 			return
 		}
 
+	}
+
+	if patient.PhoneNumber != "" {
+
+		err := c.DB.CheckPhoneNumberPatient(patient.PhoneNumber)
+
+		if !errors.Is(err, sql.ErrNoRows) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 	}
 
 	//make one func ???

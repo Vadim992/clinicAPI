@@ -3,7 +3,7 @@ CREATE TABLE doctors (
     FirstName      VARCHAR  NOT NULL, -- was VARCHAR(50)
     LastName       VARCHAR  NOT NULL, -- was VARCHAR(50)
     Specialization VARCHAR NOT NULL, -- was VARCHAR(100)
-    Email VARCHAR(320) UNIQUE NOT NULL , -- add this data
+    Email VARCHAR(320) UNIQUE NOT NULL , -- add this database
     Room           INTEGER      NOT NULL
 );
 

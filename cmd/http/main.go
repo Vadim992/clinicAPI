@@ -12,15 +12,6 @@ import (
 	"os"
 )
 
-//const (
-//	host       = "localhost"
-//	username   = "clinicapi_user"
-//	password   = "mypass"
-//	dbname     = "clinicapi"
-//	port       = 5432
-//	searchPath = "clinicapi"
-//)
-
 func init() {
 	err := godotenv.Load(".env")
 

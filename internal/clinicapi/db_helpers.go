@@ -6,10 +6,12 @@ import (
 	"github.com/Vadim992/clinicAPI/pkg/database/postgres"
 	"github.com/Vadim992/clinicAPI/pkg/validator/validate"
 	"reflect"
+	"strconv"
 	"strings"
+	"time"
 )
 
-//checkEmail checks Is valid PATIENT email or not
+//checkEmail checks Is valid PATIENT's email or not
 
 func checkEmail(email sql.NullString) bool {
 	if email.Valid {
@@ -24,6 +26,8 @@ func checkStructs(structs interface{}) bool {
 	switch structs.(type) {
 	case postgres.Patient:
 	case postgres.Doctor:
+	case postgres.Record:
+
 	default:
 		return false
 	}
@@ -46,6 +50,16 @@ func checkStructs(structs interface{}) bool {
 			if v.Field(i).String() == "" {
 				return false
 			}
+		case reflect.Struct:
+			structVal := v.Field(i).Interface()
+
+			switch curStruct := structVal.(type) {
+			case time.Time:
+				if curStruct.IsZero() {
+					return false
+				}
+			}
+
 		}
 	}
 
@@ -108,4 +122,35 @@ func patchStructs(structs interface{}) string {
 	str = str[:len(str)-1]
 
 	return str
+}
+
+// func checkPhoneNum checks Is valid PATIENT's phone number or not
+func checkPhoneNum(phoneNum string) bool {
+	return validate.ValidatePhoneNum(phoneNum)
+}
+
+// formatPhoneNumber formats every phone number to 81112223344
+func formatPhoneNumber(phoneNum string) string {
+	var formatedPhone strings.Builder
+
+	for i := 0; i < len(phoneNum); i++ {
+		if phoneNum[i] == '+' {
+			formatedPhone.WriteByte('8')
+			i++
+			continue
+		}
+
+		if _, err := strconv.Atoi(string(phoneNum[i])); err == nil {
+			formatedPhone.WriteByte(phoneNum[i])
+		}
+	}
+	return formatedPhone.String()
+}
+
+// validateNumPage checks that page > 0
+func validateNumPage(page int) bool {
+	if page < 1 {
+		return false
+	}
+	return true
 }

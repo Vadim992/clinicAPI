@@ -13,10 +13,17 @@ type Doctor struct {
 	Email          string `json:"email"`
 }
 
-func (db *DB) GetAllDoctors() ([]Doctor, error) {
-	stmt := `SELECT * FROM doctors`
+func (db *DB) GetDoctors(offset, limit int, filter string) ([]Doctor, error) {
 
-	rows, err := db.DB.Query(stmt)
+	var order string
+
+	if filter != "" {
+		order = fmt.Sprintf("ORDER BY %s", filter)
+	}
+	stmt := `SELECT * FROM patients $1
+    LIMIT $2 OFFSET $3`
+
+	rows, err := db.DB.Query(stmt, order, limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -28,7 +35,8 @@ func (db *DB) GetAllDoctors() ([]Doctor, error) {
 	for rows.Next() {
 		doctor := Doctor{}
 
-		err := rows.Scan(&doctor.Id, &doctor.FirstName, &doctor.LastName, &doctor.Specialization, &doctor.Room, &doctor.Email)
+		err := rows.Scan(&doctor.Id, &doctor.FirstName, &doctor.LastName, &doctor.Specialization,
+			&doctor.Room, &doctor.Email)
 
 		if err != nil {
 			return nil, err

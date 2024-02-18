@@ -6,17 +6,24 @@ import (
 )
 
 type Patient struct {
-	Id        int            `json:"id"`
-	FirstName string         `json:"firstName"`
-	LastName  string         `json:"lastName"`
-	Email     sql.NullString `json:"email"`
-	Address   string         `json:"address"`
+	Id          int            `json:"id"`
+	FirstName   string         `json:"firstName"`
+	LastName    string         `json:"lastName"`
+	Email       sql.NullString `json:"email"`
+	Address     string         `json:"address"`
+	PhoneNumber string         `json:"phoneNumber"`
 }
 
-func (db *DB) GetPatients() ([]Patient, error) {
-	stmt := `SELECT * FROM patients `
+func (db *DB) GetPatients(offset, limit int, filter string) ([]Patient, error) {
+	var order string
 
-	rows, err := db.DB.Query(stmt)
+	if filter != "" {
+		order = fmt.Sprintf("ORDER BY %s", filter)
+	}
+	stmt := fmt.Sprintf(`SELECT * FROM patients %s
+    LIMIT $1 OFFSET $2;`, order)
+
+	rows, err := db.DB.Query(stmt, limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -28,7 +35,8 @@ func (db *DB) GetPatients() ([]Patient, error) {
 	for rows.Next() {
 		patient := Patient{}
 
-		err := rows.Scan(&patient.Id, &patient.FirstName, &patient.LastName, &patient.Email, &patient.Address)
+		err := rows.Scan(&patient.Id, &patient.FirstName, &patient.LastName, &patient.Email, &patient.Address,
+			&patient.PhoneNumber)
 
 		if err != nil {
 			return nil, err
@@ -53,7 +61,8 @@ func (db *DB) GetPatientId(id int) (Patient, error) {
 
 	p := Patient{}
 
-	err := row.Scan(&p.Id, &p.FirstName, &p.LastName, &p.Email, &p.Address)
+	err := row.Scan(&p.Id, &p.FirstName, &p.LastName, &p.Email, &p.Address,
+		&p.PhoneNumber)
 
 	if err != nil {
 		return p, err
@@ -65,7 +74,7 @@ func (db *DB) InsertPatient(p Patient) error {
 
 	stmt := `INSERT INTO patients (firstname, lastname, email, address) VALUES ($1, $2, $3, $4)`
 
-	if _, err := db.DB.Exec(stmt, p.FirstName, p.LastName, p.Email, p.Address); err != nil {
+	if _, err := db.DB.Exec(stmt, p.FirstName, p.LastName, p.Email, p.Address, &p.PhoneNumber); err != nil {
 		return err
 	}
 
@@ -79,9 +88,9 @@ func (db *DB) UpdatePatientAll(id int, p Patient) error {
 	}
 
 	stmt := "UPDATE patients SET  firstname = $1," +
-		"lastname = $2, email= $3, address = $4 WHERE id=$5"
+		"lastname = $2, email= $3, address = $4, phone_number = $5 WHERE id=$6"
 
-	if _, err := db.DB.Exec(stmt, p.FirstName, p.LastName, p.Email, p.Address, id); err != nil {
+	if _, err := db.DB.Exec(stmt, p.FirstName, p.LastName, p.Email, p.Address, p.PhoneNumber, id); err != nil {
 		return err
 	}
 
@@ -125,6 +134,17 @@ func (db *DB) CheckEmailPatient(email string) error {
 
 	p := Patient{}
 	err := row.Scan(&p.Id, &p.FirstName, &p.LastName, &p.Email, &p.Address)
+
+	return err
+}
+
+func (db *DB) CheckPhoneNumberPatient(phoneNumber string) error {
+	stmt := fmt.Sprintf(`SELECT * FROM patients WHERE phone_number=$1`)
+
+	row := db.DB.QueryRow(stmt, phoneNumber)
+
+	p := Patient{}
+	err := row.Scan(&p.Id, &p.FirstName, &p.LastName, &p.Email, &p.Address, &p.PhoneNumber)
 
 	return err
 }

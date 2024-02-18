@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+var pageSize = 3
+
 func (c *ClinicAPI) handlePatients(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
@@ -103,6 +105,40 @@ func (c *ClinicAPI) handleDoctorId(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 
 		c.deleteDoctor(w, r, id)
+
+	}
+}
+
+func (c *ClinicAPI) handleAppointments(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		c.getAppointments(w, r)
+	case http.MethodPost:
+		c.postAppointment(w, r)
+	}
+}
+
+func (c *ClinicAPI) handleAppointmentsId(w http.ResponseWriter, r *http.Request) {
+	idStr := mux.Vars(r)["id"]
+
+	id, err := strconv.Atoi(idStr)
+
+	if err != nil {
+		c.serveErr(w, err)
+		return
+	}
+
+	if !validate.ValidateId(id) {
+		c.notFound(w)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		c.getAppointmentsId(w, r, id)
+	case http.MethodPut:
+	case http.MethodPatch:
+	case http.MethodDelete:
 
 	}
 }

@@ -19,6 +19,9 @@ func (c *ClinicAPI) Routes() http.Handler {
 	router.HandleFunc("/doctors", c.handleDoctors).Methods("GET", "POST")
 	router.HandleFunc("/doctors/{id:[0-9]+}", c.handleDoctorId).Methods("GET", "PUT", "PATCH", "DELETE")
 
+	router.HandleFunc("/appointments", c.handleAppointments).Methods("GET", "POST")
+	router.HandleFunc("/appointments/{id:[0-9]+}", c.handleAppointmentsId).Methods("GET", "PUT", "PATCH", "DELETE")
+
 	mwChain := alice.New(c.recoverPanic, c.logRequest, setHeaders)
 
 	return mwChain.Then(router)

@@ -7,11 +7,41 @@ import (
 	"github.com/Vadim992/clinicAPI/pkg/database/postgres"
 	"github.com/Vadim992/clinicAPI/pkg/validator/validate"
 	"net/http"
+	"strings"
 )
 
 func (c *ClinicAPI) getDoctors(w http.ResponseWriter, r *http.Request) {
+	var pageData PageData
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 
-	doctors, err := c.DB.GetAllDoctors()
+	if err := decoder.Decode(&pageData); err != nil {
+		c.serveErr(w, err)
+		return
+	}
+
+	if !validateNumPage(pageData.Page) {
+		c.clientErr(w, http.StatusBadRequest)
+		return
+	}
+
+	if pageData.DoctorsFilter.SpecializationFilter && pageData.DoctorsFilter.FirstNameFilter {
+		c.clientErr(w, http.StatusBadRequest)
+		return
+	}
+
+	offset := (pageData.Page - 1) * pageSize
+
+	var filter string
+
+	switch true {
+	case pageData.DoctorsFilter.SpecializationFilter:
+		filter = "specialization"
+	case pageData.DoctorsFilter.FirstNameFilter:
+		filter = "firstname"
+	}
+
+	doctors, err := c.DB.GetDoctors(offset, pageSize, filter)
 
 	if err != nil {
 		c.serveErr(w, err)
@@ -65,6 +95,8 @@ func (c *ClinicAPI) postDoctor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	doctor.Email = strings.ToLower(doctor.Email)
+
 	//TODO: make one func ???
 
 	// Validate doctor
@@ -105,6 +137,7 @@ func (c *ClinicAPI) putDoctor(w http.ResponseWriter, r *http.Request, id int) {
 		c.serveErr(w, err)
 		return
 	}
+	doctor.Email = strings.ToLower(doctor.Email)
 
 	//TODO: make one func ???
 
@@ -151,6 +184,8 @@ func (c *ClinicAPI) patchDoctor(w http.ResponseWriter, r *http.Request, id int) 
 		c.serveErr(w, err)
 		return
 	}
+
+	doctor.Email = strings.ToLower(doctor.Email)
 
 	//TODO: make one func ???
 
