@@ -7,8 +7,6 @@ import (
 	"strconv"
 )
 
-var pageSize = 3
-
 func (c *ClinicAPI) handlePatients(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
@@ -137,8 +135,10 @@ func (c *ClinicAPI) handleAppointmentsId(w http.ResponseWriter, r *http.Request)
 	case http.MethodGet:
 		c.getAppointmentsId(w, r, id)
 	case http.MethodPut:
+		c.putAppointment(w, r, id)
 	case http.MethodPatch:
+		c.patchAppointment(w, r, id)
 	case http.MethodDelete:
-
+		c.deleteAppointment(w, r, id)
 	}
 }

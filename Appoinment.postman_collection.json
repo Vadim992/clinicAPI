@@ -1,13 +1,13 @@
 {
 	"info": {
-		"_postman_id": "ccb2e168-e033-4d6b-8aaa-4172352062b4",
-		"name": "Patient",
+		"_postman_id": "b4081b67-c26a-49c5-96df-e38eb1f45ee5",
+		"name": "Appoinment",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32193943"
 	},
 	"item": [
 		{
-			"name": "patients",
+			"name": "appointments",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -16,7 +16,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"page\": 1,\n    \"pageSize\":5,\n    \"patientsFilter\":{\n        \"firstNameFilter\": true\n    }\n}",
+					"raw": "{\n    \"page\":1,\n    \"pageSize\":2\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -24,59 +24,27 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/patients",
+					"raw": "http://localhost:3000/appointments",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"patients"
+						"appointments"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "patients/id",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/patients/5",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"patients",
-						"5"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "patients",
+			"name": "appointments",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"firstname\": \"Andrey\",\n    \"lastname\": \"Push\",\n    \"email\": {\n        \"String\":\"him@mail.ru\",\n        \"Valid\": true\n    },\n    \"phone_number\": \"+7 (123) 123-12-14\",\n    \"address\": \"addr\"\n}",
+					"raw": "{\n    \"doctorid\": 1,\n    \"patientid\": {\n        \"Valid\":true,\n        \"Int64\": 1\n    },\n    \"time_start\": \"2024-02-20T11:15:00Z\",\n    \"time_end\": \"2024-02-20T11:30:00Z\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -84,27 +52,27 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/patients",
+					"raw": "http://localhost:3000/appointments",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"patients"
+						"appointments"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "patients/id",
+			"name": "appointments/id",
 			"request": {
-				"method": "PUT",
+				"method": "DELETE",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"id\":3,\n    \"firstname\": \"Dima\",\n    \"lastname\": \"Push\",\n    \"email\":{\n        \"String\":\"new1@mail.ru\",\n        \"Valid\": true\n    },\n    \"phone_number\": \"+7 (123) 123-12-13\",\n    \"address\": \"addr1\"\n}",
+					"raw": "{\n    \"startTime\":\"2024-02-20T11:15:00Z\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -112,28 +80,28 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/patients/4",
+					"raw": "http://localhost:3000/appointments/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"patients",
-						"4"
+						"appointments",
+						"1"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "patients/id",
+			"name": "appointments/id",
 			"request": {
 				"method": "PATCH",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": null,\n    \"address\": \"address3\"\n}",
+					"raw": "{\n    \"startTime\":\"2024-02-20T11:15:00Z\",\n    \"record\": {\n        \"doctorid\":2,\n        \"patientid\":{\n            \"Valid\":true,\n            \"Int64\": 2\n        },\n        \"time_end\":\"2024-02-20T11:30:00Z\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -141,35 +109,44 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/patients/4",
+					"raw": "http://localhost:3000/appointments/2",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"patients",
-						"4"
+						"appointments",
+						"2"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "patients/id",
+			"name": "appointments/id",
 			"request": {
-				"method": "DELETE",
+				"method": "PUT",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"startTime\":\"2024-02-20T11:16:00Z\",\n    \"record\": {\n        \"doctorid\":2,\n        \"patientid\":{\n            \"Valid\":true,\n            \"Int64\": 2\n        },\n        \"time_start\":\"2024-02-20T11:15:00Z\",\n        \"time_end\":\"2024-02-20T11:30:00Z\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://localhost:3000/patients/4",
+					"raw": "http://localhost:3000/appointments/2",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"patients",
-						"4"
+						"appointments",
+						"2"
 					]
 				}
 			},

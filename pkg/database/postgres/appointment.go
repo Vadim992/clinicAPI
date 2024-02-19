@@ -8,20 +8,6 @@ import (
 	"time"
 )
 
-type Record struct {
-	DoctorId  int           `json:"doctorId"`
-	PatientId sql.NullInt64 `json:"patientId"`
-	TimeStart time.Time     `json:"timeStart"`
-	TimeEnd   time.Time     `json:"timeEnd"`
-}
-
-type Appointment struct {
-	DoctorFirstName      string    `json:"doctorFirstName"`
-	DoctorLastName       string    `json:"doctorLastName"`
-	DoctorSpecialization string    `json:"doctorSpecialization"`
-	TimeStart            time.Time `json:"timeStart"`
-}
-
 func (db *DB) GetAppointments(offset, limit int, filter string) ([]Appointment, error) {
 
 	var order string
@@ -116,22 +102,13 @@ func (db *DB) GetAppointmentsId(offset, limit, id int) ([]Appointment, error) {
 
 }
 
-func (db *DB) ValidateRecord(record Record) error {
+func (db *DB) ValidateRecord(id int, record Record) error {
 
-	validTime := record.TimeEnd.After(record.TimeStart) && record.TimeStart.After(time.Now())
+	validTime := record.Time_End.After(record.Time_Start) && record.Time_Start.After(time.Now())
 
 	if !validTime {
 		return recordsErr.TimeErr
 	}
-
-	//_, err := db.GetDoctorId(id)
-	//
-	//if err != nil {
-	//
-	//	if !errors.Is(err, sql.ErrNoRows) {
-	//		return err
-	//	}
-	//}
 
 	_, err := db.GetDoctorId(record.DoctorId)
 
@@ -145,7 +122,7 @@ func (db *DB) ValidateRecord(record Record) error {
 
 	stmt := `SELECT time_start FROM records WHERE doctorid = $1 AND time_start = $2`
 
-	row := db.DB.QueryRow(stmt, record.DoctorId, record.TimeStart)
+	row := db.DB.QueryRow(stmt, record.DoctorId, record.Time_Start)
 
 	var timeStart time.Time
 
@@ -163,7 +140,7 @@ func (db *DB) InsertAppointment(record Record) error {
 
 	stmt := `INSERT INTO records (doctorid,patientid, time_start, time_end) VALUES($1, $2, $3, $4)`
 
-	_, err := db.DB.Exec(stmt, record.DoctorId, record.PatientId, record.TimeStart, record.TimeEnd)
+	_, err := db.DB.Exec(stmt, record.DoctorId, record.PatientId, record.Time_Start, record.Time_End)
 
 	if err != nil {
 		return err
@@ -175,18 +152,14 @@ func (db *DB) InsertAppointment(record Record) error {
 
 func (db *DB) UpdateAppointmentAll(id int, start time.Time, record Record) error {
 
-	_, err := db.GetDoctorId(id)
-
-	if err != nil {
-		return err
-	}
-
 	stmt := `UPDATE records SET doctorid = $1,
                    patientid = $2,
                    time_start = $3, 
-                   time_end = $4`
+                   time_end = $4
+                   WHERE doctorid=$5 AND time_start=$6`
 
-	_, err = db.DB.Exec(stmt, record.DoctorId, record.PatientId, record.TimeStart, record.TimeEnd)
+	_, err := db.DB.Exec(stmt, record.DoctorId, record.PatientId, record.Time_Start, record.Time_End,
+		id, start)
 
 	if err != nil {
 		return err
@@ -198,15 +171,9 @@ func (db *DB) UpdateAppointmentAll(id int, start time.Time, record Record) error
 
 func (db *DB) UpdateAppointment(id int, start time.Time, req string) error {
 
-	_, err := db.GetDoctorId(id)
+	stmt := fmt.Sprintf("UPDATE records SET %s WHERE doctorid=$1 AND time_start=$2", req)
 
-	if err != nil {
-		return err
-	}
-
-	stmt := fmt.Sprintf("UPDATE recotrds SET %s WHERE id=$1 AND time_start=$2", req)
-
-	_, err = db.DB.Exec(stmt, id, start)
+	_, err := db.DB.Exec(stmt, id, start)
 
 	if err != nil {
 		return err
@@ -217,18 +184,30 @@ func (db *DB) UpdateAppointment(id int, start time.Time, req string) error {
 
 func (db *DB) DeleteAppointment(id int, start time.Time) error {
 
-	_, err := db.GetDoctorId(id)
-
-	if err != nil {
+	if err := db.CheckRecord(id, start); err != nil {
 		return err
 	}
 
-	stmt := `DELETE FROM records WHERE id=$1 AND time_start=$2`
+	stmt := `DELETE FROM records WHERE doctorid=$1 AND time_start=$2`
 
 	if _, err := db.DB.Exec(stmt, id, start); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (db *DB) CheckRecord(doctorId int, timeStart time.Time) error {
+	stmt := `SELECT * FROM records WHERE doctorid=$1 AND time_start=$2`
+
+	row := db.DB.QueryRow(stmt, doctorId, timeStart)
+
+	var record Record
+
+	err := row.Scan(&record.DoctorId, &record.PatientId, &record.Time_End, &record.Time_End)
+
+	if err != nil {
+		return err
+	}
 	return nil
 }

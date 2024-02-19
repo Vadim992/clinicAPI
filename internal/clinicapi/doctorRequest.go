@@ -5,22 +5,24 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/Vadim992/clinicAPI/pkg/database/postgres"
-	"github.com/Vadim992/clinicAPI/pkg/validator/validate"
+	"io"
 	"net/http"
 	"strings"
 )
 
 func (c *ClinicAPI) getDoctors(w http.ResponseWriter, r *http.Request) {
 	var pageData PageData
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
 
-	if err := decoder.Decode(&pageData); err != nil {
+	if err := decode(r, &pageData); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 		c.serveErr(w, err)
 		return
 	}
 
-	if !validateNumPage(pageData.Page) {
+	if !validateNumPage(pageData.Page, pageData.PageSize) {
 		c.clientErr(w, http.StatusBadRequest)
 		return
 	}
@@ -30,7 +32,7 @@ func (c *ClinicAPI) getDoctors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset := (pageData.Page - 1) * pageSize
+	offset := (pageData.Page - 1) * pageData.PageSize
 
 	var filter string
 
@@ -41,7 +43,7 @@ func (c *ClinicAPI) getDoctors(w http.ResponseWriter, r *http.Request) {
 		filter = "firstname"
 	}
 
-	doctors, err := c.DB.GetDoctors(offset, pageSize, filter)
+	doctors, err := c.DB.GetDoctors(offset, pageData.PageSize, filter)
 
 	if err != nil {
 		c.serveErr(w, err)
@@ -87,37 +89,20 @@ func (c *ClinicAPI) postDoctor(w http.ResponseWriter, r *http.Request) {
 
 	var doctor postgres.Doctor
 
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-
-	if err := decoder.Decode(&doctor); err != nil {
+	if err := decode(r, &doctor); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 		c.serveErr(w, err)
 		return
 	}
 
 	doctor.Email = strings.ToLower(doctor.Email)
 
-	//TODO: make one func ???
-
-	// Validate doctor
-	if !checkStructs(doctor) {
-		c.clientErr(w, http.StatusBadRequest)
+	if !c.validateDoctor(w, r, doctor) {
 		return
 	}
-
-	if !validate.ValidateEmail(doctor.Email) {
-		c.clientErr(w, http.StatusBadRequest)
-		return
-	}
-
-	err := c.DB.CheckEmailPatient(doctor.Email)
-
-	if !errors.Is(err, sql.ErrNoRows) {
-		c.clientErr(w, http.StatusBadRequest)
-		return
-	}
-
-	// make one func for validation ???
 
 	if err := c.DB.InsertDoctor(doctor); err != nil {
 		c.serveErr(w, err)
@@ -128,38 +113,22 @@ func (c *ClinicAPI) postDoctor(w http.ResponseWriter, r *http.Request) {
 
 func (c *ClinicAPI) putDoctor(w http.ResponseWriter, r *http.Request, id int) {
 
-	decoder := json.NewDecoder(r.Body)
-
 	var doctor postgres.Doctor
-	decoder.DisallowUnknownFields()
 
-	if err := decoder.Decode(&doctor); err != nil {
+	if err := decode(r, &doctor); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 		c.serveErr(w, err)
 		return
 	}
+
 	doctor.Email = strings.ToLower(doctor.Email)
 
-	//TODO: make one func ???
-
-	// Validate doctor
-	if !checkStructs(doctor) {
-		c.clientErr(w, http.StatusBadRequest)
+	if !c.validateDoctor(w, r, doctor) {
 		return
 	}
-
-	if !validate.ValidateEmail(doctor.Email) {
-		c.clientErr(w, http.StatusBadRequest)
-		return
-	}
-
-	err := c.DB.CheckEmailPatient(doctor.Email)
-
-	if !errors.Is(err, sql.ErrNoRows) {
-		c.clientErr(w, http.StatusBadRequest)
-		return
-	}
-
-	// make one func for validation ???
 
 	if err := c.DB.UpdateDoctorAll(id, doctor); err != nil {
 
@@ -175,46 +144,29 @@ func (c *ClinicAPI) putDoctor(w http.ResponseWriter, r *http.Request, id int) {
 
 func (c *ClinicAPI) patchDoctor(w http.ResponseWriter, r *http.Request, id int) {
 
-	decoder := json.NewDecoder(r.Body)
-
 	var doctor postgres.Doctor
-	decoder.DisallowUnknownFields()
 
-	if err := decoder.Decode(&doctor); err != nil {
+	if err := decode(r, &doctor); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 		c.serveErr(w, err)
 		return
 	}
 
 	doctor.Email = strings.ToLower(doctor.Email)
 
-	//TODO: make one func ???
+	if !c.validateDoctor(w, r, doctor) {
+		return
+	}
 
-	// Validate doctor
-
-	req := patchStructs(doctor)
+	req := patchCheckStructs(doctor)
 
 	if req == "" {
 		c.clientErr(w, http.StatusBadRequest)
 		return
 	}
-
-	if doctor.Email != "" {
-
-		if !validate.ValidateEmail(doctor.Email) {
-			c.clientErr(w, http.StatusBadRequest)
-			return
-		}
-
-		err := c.DB.CheckEmailPatient(doctor.Email)
-
-		if !errors.Is(err, sql.ErrNoRows) {
-			c.clientErr(w, http.StatusBadRequest)
-			return
-		}
-
-	}
-
-	// make one func ???
 
 	if err := c.DB.UpdateDoctor(id, req); err != nil {
 

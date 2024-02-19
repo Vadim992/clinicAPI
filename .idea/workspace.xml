@@ -6,17 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="125a2333-bee8-4c20-9e3a-26bdb979e217" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/http/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/http/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/clinicapi/db_helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/db_helpers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/clinicapi/doctor_req.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/doctorRequest.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Doctor.postman_collection.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Patient.postman_collection.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/clinicapi/appointmentRequest.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/appointmentRequest.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/clinicapi/db_helpers.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/db_checkers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/clinicapi/doctorRequest.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/doctorRequest.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/clinicapi/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/handlers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/clinicapi/patient_req.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/patientRequest.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/clinicapi/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/routes.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/clinicapi/struct.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/struct.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/data/create_db_user.sql" beforeDir="false" afterPath="$PROJECT_DIR$/internal/database/create_db_user.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/data/create_doctors_tables.sql" beforeDir="false" afterPath="$PROJECT_DIR$/internal/database/v1.0(baseline)/create_doctors_tables.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/data/create_patients_tables.sql" beforeDir="false" afterPath="$PROJECT_DIR$/internal/database/v1.0(baseline)/create_patients_tables.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/data/create_records_tables.sql" beforeDir="false" afterPath="$PROJECT_DIR$/internal/database/v1.0(baseline)/create_records_tables.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/clinicapi/patientRequest.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/clinicapi/patientRequest.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/clinicapi/struct.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/customErr/recordsErr/recordsErr.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/customErr/recordsErr/recordsErr.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/database/postgres/appointment.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/database/postgres/appointment.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pkg/database/postgres/doctor.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/database/postgres/doctor.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pkg/database/postgres/patient.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/database/postgres/patient.go" afterDir="false" />
     </list>
@@ -48,22 +47,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultGoTemplateProperty": "Go File",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.format.on.save.advertiser.fired": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "RunOnceActivity.go.watchers.conflict.with.on.save.actions.check.performed": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/home/vadim/Go/clinicAPI/internal/database/v1.0(baseline)"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.format.on.save.advertiser.fired&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.watchers.conflict.with.on.save.actions.check.performed&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/vadim/Go/clinicAPI/internal/database/v1.0(baseline)&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/internal/database/v1.0(baseline)" />

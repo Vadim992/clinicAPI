@@ -1,18 +1,8 @@
 package postgres
 
 import (
-	"database/sql"
 	"fmt"
 )
-
-type Patient struct {
-	Id          int            `json:"id"`
-	FirstName   string         `json:"firstName"`
-	LastName    string         `json:"lastName"`
-	Email       sql.NullString `json:"email"`
-	Address     string         `json:"address"`
-	PhoneNumber string         `json:"phoneNumber"`
-}
 
 func (db *DB) GetPatients(offset, limit int, filter string) ([]Patient, error) {
 	var order string
@@ -36,7 +26,7 @@ func (db *DB) GetPatients(offset, limit int, filter string) ([]Patient, error) {
 		patient := Patient{}
 
 		err := rows.Scan(&patient.Id, &patient.FirstName, &patient.LastName, &patient.Email, &patient.Address,
-			&patient.PhoneNumber)
+			&patient.Phone_Number)
 
 		if err != nil {
 			return nil, err
@@ -62,7 +52,7 @@ func (db *DB) GetPatientId(id int) (Patient, error) {
 	p := Patient{}
 
 	err := row.Scan(&p.Id, &p.FirstName, &p.LastName, &p.Email, &p.Address,
-		&p.PhoneNumber)
+		&p.Phone_Number)
 
 	if err != nil {
 		return p, err
@@ -72,9 +62,9 @@ func (db *DB) GetPatientId(id int) (Patient, error) {
 
 func (db *DB) InsertPatient(p Patient) error {
 
-	stmt := `INSERT INTO patients (firstname, lastname, email, address) VALUES ($1, $2, $3, $4)`
+	stmt := `INSERT INTO patients (firstname, lastname, email, address, phone_number) VALUES ($1, $2, $3, $4,$5)`
 
-	if _, err := db.DB.Exec(stmt, p.FirstName, p.LastName, p.Email, p.Address, &p.PhoneNumber); err != nil {
+	if _, err := db.DB.Exec(stmt, p.FirstName, p.LastName, p.Email, p.Address, &p.Phone_Number); err != nil {
 		return err
 	}
 
@@ -90,7 +80,7 @@ func (db *DB) UpdatePatientAll(id int, p Patient) error {
 	stmt := "UPDATE patients SET  firstname = $1," +
 		"lastname = $2, email= $3, address = $4, phone_number = $5 WHERE id=$6"
 
-	if _, err := db.DB.Exec(stmt, p.FirstName, p.LastName, p.Email, p.Address, p.PhoneNumber, id); err != nil {
+	if _, err := db.DB.Exec(stmt, p.FirstName, p.LastName, p.Email, p.Address, p.Phone_Number, id); err != nil {
 		return err
 	}
 
@@ -144,7 +134,7 @@ func (db *DB) CheckPhoneNumberPatient(phoneNumber string) error {
 	row := db.DB.QueryRow(stmt, phoneNumber)
 
 	p := Patient{}
-	err := row.Scan(&p.Id, &p.FirstName, &p.LastName, &p.Email, &p.Address, &p.PhoneNumber)
+	err := row.Scan(&p.Id, &p.FirstName, &p.LastName, &p.Email, &p.Address, &p.Phone_Number)
 
 	return err
 }

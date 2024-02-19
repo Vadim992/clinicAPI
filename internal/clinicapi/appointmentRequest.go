@@ -6,32 +6,34 @@ import (
 	"errors"
 	"github.com/Vadim992/clinicAPI/internal/customErr/recordsErr"
 	"github.com/Vadim992/clinicAPI/pkg/database/postgres"
-	"github.com/Vadim992/clinicAPI/pkg/validator/validate"
+	"io"
 	"net/http"
 )
 
 func (c *ClinicAPI) getAppointments(w http.ResponseWriter, r *http.Request) {
 	var pageData PageData
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
 
-	if err := decoder.Decode(&pageData); err != nil {
+	if err := decode(r, &pageData); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 		c.serveErr(w, err)
 		return
 	}
 
-	if !validateNumPage(pageData.Page) {
+	if !validateNumPage(pageData.Page, pageData.PageSize) {
 		c.clientErr(w, http.StatusBadRequest)
 		return
 	}
 
-	offset := (pageData.Page - 1) * pageSize
+	offset := (pageData.Page - 1) * pageData.PageSize
 
 	// In future we can filter datas
 
 	var filter string
 
-	appointments, err := c.DB.GetAppointments(offset, pageSize, filter)
+	appointments, err := c.DB.GetAppointments(offset, pageData.PageSize, filter)
 
 	if err != nil {
 		c.serveErr(w, err)
@@ -50,22 +52,24 @@ func (c *ClinicAPI) getAppointments(w http.ResponseWriter, r *http.Request) {
 
 func (c *ClinicAPI) getAppointmentsId(w http.ResponseWriter, r *http.Request, id int) {
 	var pageData PageData
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
 
-	if err := decoder.Decode(&pageData); err != nil {
+	if err := decode(r, &pageData); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 		c.serveErr(w, err)
 		return
 	}
 
-	if !validateNumPage(pageData.Page) {
+	if !validateNumPage(pageData.Page, pageData.PageSize) {
 		c.clientErr(w, http.StatusBadRequest)
 		return
 	}
 
-	offset := (pageData.Page - 1) * pageSize
+	offset := (pageData.Page - 1) * pageData.PageSize
 
-	appointments, err := c.DB.GetAppointmentsId(offset, pageSize, id)
+	appointments, err := c.DB.GetAppointmentsId(offset, pageData.PageSize, id)
 
 	if err != nil {
 
@@ -91,30 +95,53 @@ func (c *ClinicAPI) getAppointmentsId(w http.ResponseWriter, r *http.Request, id
 func (c *ClinicAPI) postAppointment(w http.ResponseWriter, r *http.Request) {
 
 	var record postgres.Record
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
 
-	if err := decoder.Decode(&record); err != nil {
+	if err := decode(r, &record); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
 		c.serveErr(w, err)
 		return
 	}
 
-	if !validate.ValidateId(record.DoctorId) {
+	if !putCheckStructs(record) {
 		c.clientErr(w, http.StatusBadRequest)
 		return
 	}
 
-	if err := c.DB.ValidateRecord(record); err != nil {
+	if err := c.validateRecordPOST(record); err != nil {
 
 		switch true {
+		case errors.Is(err, recordsErr.InsertErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, recordsErr.IdErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
 		case errors.Is(err, recordsErr.TimeErr):
+
 			c.clientErr(w, http.StatusBadRequest)
+			return
+
 		case errors.Is(err, recordsErr.DoctorIdErr):
+
 			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, recordsErr.PatientIdErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
 		default:
 			c.serveErr(w, err)
+			return
 		}
-		return
 
 	}
 
@@ -128,14 +155,150 @@ func (c *ClinicAPI) postAppointment(w http.ResponseWriter, r *http.Request) {
 
 // TODO: PUT, PATCH, DELETE for appointments
 
-func (c *ClinicAPI) putAppointment(w http.ResponseWriter, r *http.Request) {
+func (c *ClinicAPI) putAppointment(w http.ResponseWriter, r *http.Request, id int) {
+
+	var appointmentData AppointmentsData
+
+	if err := decode(r, &appointmentData); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
+		c.serveErr(w, err)
+		return
+	}
+
+	if !putCheckStructs(appointmentData.Record) {
+		c.clientErr(w, http.StatusBadRequest)
+		return
+	}
+
+	if err := c.validateRecordPUT(id, appointmentData); err != nil {
+
+		switch true {
+		case errors.Is(err, recordsErr.IdErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, recordsErr.TimeErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, recordsErr.DoctorIdErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, recordsErr.PatientIdErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, sql.ErrNoRows):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		default:
+			c.serveErr(w, err)
+			return
+		}
+	}
+
+	start := appointmentData.StartTime
+	record := appointmentData.Record
+
+	if err := c.DB.UpdateAppointmentAll(id, start, record); err != nil {
+		c.serveErr(w, err)
+		return
+	}
 
 }
 
-func (c *ClinicAPI) patchAppointment(w http.ResponseWriter, r *http.Request) {
+func (c *ClinicAPI) patchAppointment(w http.ResponseWriter, r *http.Request, id int) {
+	var appointmentData AppointmentsData
 
+	if err := decode(r, &appointmentData); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
+		c.serveErr(w, err)
+		return
+	}
+
+	if err := c.validateRecordPATCH(id, appointmentData); err != nil {
+
+		switch true {
+
+		case errors.Is(err, recordsErr.IdErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, recordsErr.TimeErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, recordsErr.DoctorIdErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, recordsErr.PatientIdErr):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		case errors.Is(err, sql.ErrNoRows):
+
+			c.clientErr(w, http.StatusBadRequest)
+			return
+
+		default:
+			c.serveErr(w, err)
+			return
+		}
+	}
+	record := appointmentData.Record
+	req := patchCheckStructs(record)
+
+	if req == "" {
+		c.clientErr(w, http.StatusBadRequest)
+		return
+	}
+
+	start := appointmentData.StartTime
+
+	if err := c.DB.UpdateAppointment(id, start, req); err != nil {
+		c.serveErr(w, err)
+		return
+	}
 }
 
-func (c *ClinicAPI) deleteAppointment(w http.ResponseWriter, r *http.Request) {
+func (c *ClinicAPI) deleteAppointment(w http.ResponseWriter, r *http.Request, id int) {
 
+	var appointmentData AppointmentsData
+
+	if err := decode(r, &appointmentData); err != nil {
+		if errors.Is(err, io.EOF) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
+		c.serveErr(w, err)
+		return
+	}
+
+	if err := c.DB.DeleteAppointment(id, appointmentData.StartTime); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.clientErr(w, http.StatusBadRequest)
+			return
+		}
+
+		c.serveErr(w, err)
+		return
+	}
 }

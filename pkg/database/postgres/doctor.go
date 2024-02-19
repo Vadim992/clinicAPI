@@ -4,15 +4,6 @@ import (
 	"fmt"
 )
 
-type Doctor struct {
-	Id             int    `json:"id"`
-	FirstName      string `json:"firstName"`
-	LastName       string `json:"lastName"`
-	Specialization string `json:"specialization"`
-	Room           int    `json:"room"`
-	Email          string `json:"email"`
-}
-
 func (db *DB) GetDoctors(offset, limit int, filter string) ([]Doctor, error) {
 
 	var order string
@@ -20,10 +11,10 @@ func (db *DB) GetDoctors(offset, limit int, filter string) ([]Doctor, error) {
 	if filter != "" {
 		order = fmt.Sprintf("ORDER BY %s", filter)
 	}
-	stmt := `SELECT * FROM patients $1
-    LIMIT $2 OFFSET $3`
+	stmt := fmt.Sprintf(`SELECT * FROM doctors %s
+    LIMIT $1 OFFSET $2`, order)
 
-	rows, err := db.DB.Query(stmt, order, limit, offset)
+	rows, err := db.DB.Query(stmt, limit, offset)
 
 	if err != nil {
 		return nil, err
