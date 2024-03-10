@@ -10,15 +10,12 @@ func ValidateEmail(email string) bool {
 	reEmail := regexp.MustCompile(`(?i)(^([a-z0-9_.-]){1,64})(@([a-z0-9_.-]+(\.(ru|com))))$`)
 
 	if reEmail.MatchString(email) {
-
 		emailArr := strings.Split(email, "@")
 
 		for _, val := range emailArr {
-
 			if !validateNameAndDomain(val) {
 				return false
 			}
-
 		}
 
 		if utf8.RuneCountInString(email) > 320 {
@@ -26,13 +23,12 @@ func ValidateEmail(email string) bool {
 		}
 
 		return true
-
 	}
+
 	return false
 }
 
 func validateNameAndDomain(str string) bool {
-
 	// func ValidateEmail guarantees that str is not empty
 	chars := map[byte]struct{}{
 		'.': {},
@@ -46,5 +42,6 @@ func validateNameAndDomain(str string) bool {
 	if okStart || okEnd {
 		return false
 	}
+
 	return true
 }

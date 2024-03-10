@@ -4,57 +4,47 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Vadim992/clinicAPI/internal/clinicapi"
-	"github.com/Vadim992/clinicAPI/pkg/database/postgres"
+	"github.com/Vadim992/clinicAPI/internal/config"
+	"github.com/Vadim992/clinicAPI/internal/database/postgres"
+	"github.com/Vadim992/clinicAPI/pkg/logger"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
-	"os"
 )
 
-func init() {
+func main() {
 	err := godotenv.Load(".env")
 
 	if err != nil {
-		log.Fatalf("Set env variables err (or have no file .env): %e", err)
+		log.Fatalf("cannot set env variables (err or have no file \".env\"): %e", err)
 	}
-}
 
-func main() {
-
-	host_db, port_db, username_db, password_db, dbname_db, searchPath_db := clinicapi.GetProjectEnv()
+	cfg := config.NewConfig()
+	cfg.SetFromEnv()
 
 	conn := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable search_path=%s",
-		host_db, port_db, username_db, password_db, dbname_db, searchPath_db)
+		cfg.HostDB, cfg.PortDB, cfg.UsernameDB, cfg.PasswordDB, cfg.DbNameDB, cfg.SearchPathDB)
 
 	addr := flag.String("addr", ":3000", "HTTP network address")
 
 	flag.Parse()
 
-	infoLog := log.New(os.Stdout, "INFO\t", log.LstdFlags)
-	errLog := log.New(os.Stderr, "ERROR\t", log.LstdFlags|log.Lshortfile)
-
-	db, err := postgres.ConnectDB(conn)
-
+	db, err := postgres.InitDB(conn)
 	if err != nil {
-		errLog.Fatal(err)
+		logger.ErrLog.Fatalf("cannot connect to database: %v", err)
 	}
 
-	c := &clinicapi.ClinicAPI{
-		ErrLog:  errLog,
-		InfoLog: infoLog,
-		DB:      &postgres.DB{DB: db},
-	}
+	postgres.DataBase.DB = db
 
 	srv := &http.Server{
 		Addr:     *addr,
-		Handler:  c.Routes(),
-		ErrorLog: c.ErrLog,
+		Handler:  clinicapi.Routes(),
+		ErrorLog: logger.ErrLog,
 	}
 
-	infoLog.Printf("Starting server on port %s\n", *addr)
+	logger.InfoLog.Printf("Starting server on port %s\n", *addr)
 
-	errLog.Fatal(srv.ListenAndServe())
-
+	logger.ErrLog.Fatal(srv.ListenAndServe())
 }

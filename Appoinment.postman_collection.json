@@ -16,7 +16,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"page\":1,\n    \"pageSize\":2\n}",
+					"raw": "{\n    \"page\":1,\n    \"pageSize\":3\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -44,7 +44,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"doctorid\": 1,\n    \"patientid\": {\n        \"Valid\":true,\n        \"Int64\": 1\n    },\n    \"time_start\": \"2024-02-20T11:15:00Z\",\n    \"time_end\": \"2024-02-20T11:30:00Z\"\n}",
+					"raw": "{\n    \"doctorid\": 2,\n    \"patientid\": null,\n    \"time_start\": \"2024-04-01T09:45:00Z\",\n    \"time_end\": \"2024-04-01T10:00:00Z\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -72,7 +72,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"startTime\":\"2024-02-20T11:15:00Z\"\n}",
+					"raw": "{\n    \"startTime\":\"2024-04-01T09:45:00Z\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -101,7 +101,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"startTime\":\"2024-02-20T11:15:00Z\",\n    \"record\": {\n        \"doctorid\":2,\n        \"patientid\":{\n            \"Valid\":true,\n            \"Int64\": 2\n        },\n        \"time_end\":\"2024-02-20T11:30:00Z\"\n    }\n}",
+					"raw": "{\n    \"startTime\":\"2024-04-01T09:45:00Z\",\n    \"record\": {\n        \"time_start\": \"2024-04-01T10:00:00Z\",\n        \"time_end\":\"2024-04-01T10:15:00Z\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -147,6 +147,38 @@
 					"path": [
 						"appointments",
 						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "appointments/per_doctors",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"page\":1,\n    \"pageSize\": 4,\n    \"appointmentsDoctorId\": [1, 2, 5]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/appointments/per_doctor",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"appointments",
+						"per_doctor"
 					]
 				}
 			},
