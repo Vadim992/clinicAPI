@@ -121,7 +121,7 @@ func getPatientId(w http.ResponseWriter, id int) error {
 }
 
 func PostPatient(w http.ResponseWriter, r *http.Request) {
-	err := postPatient(w, r)
+	err := postPatient(r)
 
 	if err != nil {
 		logger.ErrLog.Println(err)
@@ -143,10 +143,18 @@ func PostPatient(w http.ResponseWriter, r *http.Request) {
 		default:
 			helpers.ServeErr(w, err)
 		}
+
+		return
 	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
-func postPatient(w http.ResponseWriter, r *http.Request) error {
+func PostPatientReturnErr(w http.ResponseWriter, r *http.Request) error {
+	return postPatient(r)
+}
+
+func postPatient(r *http.Request) error {
 	var patient postgres.Patient
 
 	if err := patient.DecodeFromJSON(r); err != nil {
@@ -172,8 +180,6 @@ func postPatient(w http.ResponseWriter, r *http.Request) error {
 	if err := postgres.DataBase.InsertPatient(patient); err != nil {
 		return err
 	}
-
-	w.WriteHeader(http.StatusCreated)
 
 	return nil
 }

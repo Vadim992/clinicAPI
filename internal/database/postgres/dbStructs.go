@@ -8,46 +8,10 @@ import (
 
 // "Email" fields contains in map in /internal/helpers/dbhelpers/dbchecker.go
 // in func validateStruct
-type Patient struct {
-	Id           *int    `json:"id"`
-	FirstName    *string `json:"firstName"`
-	LastName     *string `json:"lastName"`
-	Email        *string `json:"email"` // may be null in DB
-	Address      *string `json:"address"`
-	Phone_Number *string `json:"phone_number"`
-}
-
-func (p *Patient) DecodeFromJSON(r *http.Request) error {
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-
-	if err := decoder.Decode(p); err != nil {
-		return err
-	}
-	return nil
-}
-
-type Doctor struct {
-	Id             *int    `json:"id"`
-	FirstName      *string `json:"firstName"`
-	LastName       *string `json:"lastName"`
-	Specialization *string `json:"specialization"`
-	Room           *int    `json:"room"`
-	Email          *string `json:"email"`
-}
-
-func (d *Doctor) DecodeFromJSON(r *http.Request) error {
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-
-	if err := decoder.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
 
 // "PatientId" fields contains in map in /internal/helpers/dbhelpers/dbchecker.go
 // in func validateStruct
+
 type Record struct {
 	DoctorId   *int       `json:"doctorId"`
 	PatientId  *int       `json:"patientId"` // may be null in DB

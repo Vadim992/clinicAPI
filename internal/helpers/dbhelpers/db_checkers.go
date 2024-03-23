@@ -43,7 +43,9 @@ func validateStruct(structs interface{}) (map[string]struct{}, bool) {
 	switch structs.(type) {
 	case postgres.Patient:
 		m["Email"] = struct{}{}
+		m["RefreshToken"] = struct{}{}
 	case postgres.Doctor:
+		m["RefreshToken"] = struct{}{}
 	case postgres.Record:
 		m["PatientId"] = struct{}{}
 	default:

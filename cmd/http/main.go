@@ -27,6 +27,8 @@ func main() {
 		"password=%s dbname=%s sslmode=disable search_path=%s",
 		cfg.HostDB, cfg.PortDB, cfg.UsernameDB, cfg.PasswordDB, cfg.DbNameDB, cfg.SearchPathDB)
 
+	config.AuthCfg.SetFromEnv()
+
 	addr := flag.String("addr", ":3000", "HTTP network address")
 
 	flag.Parse()

@@ -1,6 +1,7 @@
 package clinicapi
 
 import (
+	"fmt"
 	"github.com/Vadim992/clinicAPI/internal/clinicapi/requests/appointments"
 	"github.com/Vadim992/clinicAPI/internal/clinicapi/requests/doctors"
 	"github.com/Vadim992/clinicAPI/internal/clinicapi/requests/patients"
@@ -21,28 +22,38 @@ func Routes() http.Handler {
 	setPatientControllers(router)
 	setDoctorControllers(router)
 	setAppointmentControllers(router)
+	setRegisterControllers(router)
 
 	mwChain := alice.New(middlewares.RecoverPanic, middlewares.LogRequest, middlewares.SetHeaders)
 
 	return mwChain.Then(router)
 }
-
 func setPatientControllers(router *mux.Router) {
-	router.HandleFunc("/patients", patients.GetPatients).Methods("GET")
-	router.HandleFunc("/patients", patients.PostPatient).Methods("POST")
 
-	router.HandleFunc("/patients/{id:[0-9]+}", patients.GetPatientId).Methods("GET")
-	router.HandleFunc("/patients/{id:[0-9]+}", patients.PatchPatientId).Methods("PATCH")
-	router.HandleFunc("/patients/{id:[0-9]+}", patients.DeletePatientId).Methods("DELETE")
+	//patientsIdMW := chain.New(middlewares.Authorize, middlewares.CheckPermissions)
+
+	router.HandleFunc("/patients", middlewares.Authorize(patients.GetPatients)).Methods("GET")
+	router.HandleFunc("/patients", middlewares.Authorize(patients.PostPatient)).Methods("POST")
+
+	router.HandleFunc("/patients/{id:[0-9]+}",
+		middlewares.Authorize(middlewares.CheckPermissions(patients.GetPatientId))).Methods("GET")
+	router.HandleFunc("/patients/{id:[0-9]+}", middlewares.Authorize(patients.PatchPatientId)).Methods("PATCH")
+	router.HandleFunc("/patients/{id:[0-9]+}", middlewares.Authorize(patients.DeletePatientId)).Methods("DELETE")
+
+	router.HandleFunc("/patients/{id:[0-9]+}", middlewares.Authorize(middlewares.CheckPermissions(post))).Methods("POST")
+}
+
+func post(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Nothing")
 }
 
 func setDoctorControllers(router *mux.Router) {
 	router.HandleFunc("/doctors", doctors.GetDoctors).Methods("GET")
 	router.HandleFunc("/doctors", doctors.PostDoctor).Methods("POST")
 
-	router.HandleFunc("/doctors/{id:[0-9]+}", doctors.GetDoctorId).Methods("GET")
-	router.HandleFunc("/doctors/{id:[0-9]+}", doctors.PatchDoctorId).Methods("PATCH")
-	router.HandleFunc("/doctors/{id:[0-9]+}", doctors.DeleteDoctorId).Methods("DELETE")
+	router.HandleFunc("/doctors/{id:[0-9]+}", middlewares.Authorize(doctors.GetDoctorId)).Methods("GET")
+	router.HandleFunc("/doctors/{id:[0-9]+}", middlewares.Authorize(doctors.PatchDoctorId)).Methods("PATCH")
+	router.HandleFunc("/doctors/{id:[0-9]+}", middlewares.Authorize(doctors.DeleteDoctorId)).Methods("DELETE")
 }
 
 func setAppointmentControllers(router *mux.Router) {
@@ -55,4 +66,11 @@ func setAppointmentControllers(router *mux.Router) {
 
 	router.HandleFunc("/appointments/per_doctor",
 		appointments.GetAppointmentsCountAllDoctors).Methods("GET")
+}
+
+func setRegisterControllers(router *mux.Router) {
+	router.HandleFunc("/signin", SignIn).Methods("POST")
+	router.HandleFunc("/login", LogIn).Methods("POST")
+
+	//TODO: /logout
 }
